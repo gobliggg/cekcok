@@ -1,15 +1,34 @@
-name: Merge PRs
+name: Delete Branch on PR Closed (with Exclusions)
+
 on:
   pull_request:
     types:
-      - closed
+    - closed
+
 jobs:
-  automerge:
+  delete-branch:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Delete merged branch
-        uses: koj-co/delete-merged-action@master
-        with:
-          branches: "!main, !development, !sanity, res-*"
-        env:
-          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+      - uses: actions/checkout@v3
+
+      - name: Get PR information
+        run: |
+          pull_number=${{ github.event.number }}
+          branch_name=$(git for-each-ref --format '%(refname:short)' refs/pull/$pull_number/merge)
+
+      - name: Check if branch should be deleted (excluding specified)
+        run: |
+          if [[ "$branch_name" != "master" && "$branch_name" != "dev" && "$branch_name" =~ ^feature/ ]]; then
+            echo "Deleting branch: $branch_name"
+            delete_branch=true
+          else
+            echo "Skipping branch deletion: $branch_name"
+            delete_branch=false
+          fi
+
+      - name: Delete branch (if needed)
+        run: |
+          if [ "$delete_branch" = true ]; then
+            git push origin --delete "$branch_name"
+          fi
