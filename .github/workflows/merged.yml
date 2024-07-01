@@ -19,7 +19,7 @@ jobs:
 
       - name: Check if branch should be deleted (excluding specified)
         run: |
-          if [[ "$branch_name" =~ ^res-/ ]]; then
+          if [[ "$branch_name" =~ ^res- ]]; then
             echo "Deleting branch: $branch_name"
             delete_branch=true
           else
