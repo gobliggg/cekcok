@@ -3,7 +3,7 @@ name: Delete Branch on PR Closed (with Exclusions)
 on:
   pull_request:
     types:
-    - closed
+      - closed
 
 jobs:
   delete-branch:
@@ -19,7 +19,7 @@ jobs:
 
       - name: Check if branch should be deleted (excluding specified)
         run: |
-          if [[ "$branch_name" != "master" && "$branch_name" != "dev" && "$branch_name" =~ ^feature/ ]]; then
+          if [[ "$branch_name" =~ ^res-/ ]]; then
             echo "Deleting branch: $branch_name"
             delete_branch=true
           else
